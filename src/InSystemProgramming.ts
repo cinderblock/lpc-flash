@@ -1,6 +1,7 @@
 import { SerialPort, ReadlineParser, SerialPortOpenOptions } from 'serialport';
 import { AutoDetectTypes } from '@serialport/bindings-cpp';
 import * as ReturnCode from './ReturnCode';
+import { Logger } from './log';
 
 const UNLOCK_CODE = 0x5a5a;
 
@@ -23,20 +24,6 @@ class LineQueue implements DataQueue<string> {
   }
 }
 
-interface Logger<T> {
-  log(msg: T): void;
-}
-class VerboseLogger implements Logger<string> {
-  log(msg: string) {
-    console.log(msg);
-  }
-}
-class QuiteLogger implements Logger<string> {
-  log(msg: string) {
-    /* nothing */
-  }
-}
-
 const LINE_QUEUE = new LineQueue();
 
 const _baudRateSym = Symbol();
@@ -53,15 +40,9 @@ export class InSystemProgramming {
 
   private queue: DataQueue<string> = LINE_QUEUE;
 
-  set verbose(b: boolean) {
-    this.logger = b ? new VerboseLogger() : new QuiteLogger();
-  }
-
-  private logger: Logger<string> = new QuiteLogger();
-
   private echo: boolean = true;
 
-  constructor(private path: string, baud: number, public cclk: number) {
+  constructor(private path: string, baud: number, public cclk: number, private logger?: Logger) {
     this.reinitialize(baud, 1);
   }
 
@@ -79,7 +60,7 @@ export class InSystemProgramming {
 
     this.serialportParser.on('data', (data: Buffer | String) => {
       const s = data.toString();
-      this.logger.log(`---> ${s}`);
+      this.logger?.info(s, { source: 'serial input' });
       try {
         this.queue.push(s);
       } finally {
@@ -130,7 +111,7 @@ export class InSystemProgramming {
   }
 
   write(data: string): Promise<InSystemProgramming> {
-    this.logger.log(`<--- ${data.trim()}`); // trim EOL
+    this.logger?.info(data.trim(), { source: 'serial output' });
     this.queue.drain(); // XXX
     return new Promise<InSystemProgramming>((resolve, reject) => {
       this.serialport.write(data, (error: any) => {

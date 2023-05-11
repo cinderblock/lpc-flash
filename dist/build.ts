@@ -2,7 +2,7 @@ import { writeFile, mkdir, copyFile, rm, readdir } from 'fs/promises';
 import esbuild from 'esbuild';
 import { join } from 'path';
 import { dtsPlugin } from 'esbuild-plugin-d.ts';
-import { buildLogger as logger } from '../src/log';
+import logger from '../src/log';
 
 function forceExit() {
   setTimeout(() => {
