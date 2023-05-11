@@ -1,18 +1,16 @@
-import {InSystemProgramming} from './InSystemProgramming';
+import { InSystemProgramming } from './InSystemProgramming';
 import * as Utilities from './Utilities';
-import {MemoryBlock} from './MemoryBlock';
-import {UUDecoder} from './UUDecoder';
+import { MemoryBlock } from './MemoryBlock';
+import { UUDecoder } from './UUDecoder';
 
 const _addressSym = Symbol();
 
 export class MemoryReader {
-
-  constructor(private isp: InSystemProgramming) { }
+  constructor(private isp: InSystemProgramming) {}
 
   readFully(block: MemoryBlock): Promise<Buffer> {
     let count = Utilities.alignCount(block.length);
-    return this.isp.sendCommand(`R ${block.address} ${count}`)
-      .then(() => this.downloadChunk(block.length));
+    return this.isp.sendCommand(`R ${block.address} ${count}`).then(() => this.downloadChunk(block.length));
   }
 
   private downloadChunk(length: number): Promise<Buffer> {
@@ -24,7 +22,8 @@ export class MemoryReader {
       let buffer = new Buffer(0);
       (function loop(): void {
         if (lineCount === Utilities.LINES_PER_UUENCODED_CHUNK || index >= length) {
-          isp.assert(new RegExp(uud.checksum.toString()))
+          isp
+            .assert(new RegExp(uud.checksum.toString()))
             .then(() => isp.sendLine('OK')) // ack
             .then(() => {
               uud.reset();
@@ -34,18 +33,22 @@ export class MemoryReader {
               } else {
                 resolve(buffer);
               }
-            }).catch(error => reject(error));
-        } else { // if (index < buffer.length) {
-          isp.read().then(data => {
-            let b = uud.decode(data);
-            buffer = Buffer.concat([buffer, b], buffer.length + b.length);
-            index += b.length;
-            lineCount++;
-            process.nextTick(loop);
-          }).catch(error => reject(error));
+            })
+            .catch(error => reject(error));
+        } else {
+          // if (index < buffer.length) {
+          isp
+            .read()
+            .then(data => {
+              let b = uud.decode(data);
+              buffer = Buffer.concat([buffer, b], buffer.length + b.length);
+              index += b.length;
+              lineCount++;
+              process.nextTick(loop);
+            })
+            .catch(error => reject(error));
         }
       })();
     });
   }
-
 }

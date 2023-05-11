@@ -1,26 +1,27 @@
-import {InSystemProgramming} from './InSystemProgramming';
-import {RAMAddress} from './RAMAddress';
-import {RAMWriter} from './RAMWriter';
-import {ROMWriter} from './ROMWriter';
+import { InSystemProgramming } from './InSystemProgramming';
+import { RAMAddress } from './RAMAddress';
+import { RAMWriter } from './RAMWriter';
+import { ROMWriter } from './ROMWriter';
 import * as UserCode from './UserCode';
 
-import {EventEmitter} from 'events';
-import {Readable} from 'stream';
+import { EventEmitter } from 'events';
+import { Readable } from 'stream';
 
 function toBuffer(data: Buffer | String): Buffer {
   return Buffer.isBuffer(data) ? <Buffer>data : new Buffer(<string>data, 'binary');
 }
 
 export class Programmer extends EventEmitter {
-
   private uploader: RAMWriter;
   private writer: ROMWriter;
 
-  constructor(private isp: InSystemProgramming,
+  constructor(
+    private isp: InSystemProgramming,
     private destAddr: number,
     private length: number,
     private srcAddr: number = RAMAddress.BASE + 1024 * 10,
-    private chunkSize: number = 4096) {
+    private chunkSize: number = 4096,
+  ) {
     super();
     this.uploader = new RAMWriter(isp);
     this.writer = new ROMWriter(isp, destAddr, length);
@@ -32,7 +33,6 @@ export class Programmer extends EventEmitter {
   }
 
   private doProgram(readable: Readable): void {
-
     const buffer = new Buffer(this.chunkSize);
     let offset: number;
     let ended = false;
@@ -70,7 +70,8 @@ export class Programmer extends EventEmitter {
 
     readable.on('end', () => {
       ended = readable['isPaused'](); // tsd is not yet updated to latest node.js API
-      if (!ended) { // not paused
+      if (!ended) {
+        // not paused
         finish();
       }
     });
@@ -104,7 +105,7 @@ export class Programmer extends EventEmitter {
         } else {
           next();
         }
-      }
+      };
 
       loop();
     });
@@ -116,7 +117,6 @@ export class Programmer extends EventEmitter {
       console.log('Patching vector table...');
       UserCode.validateVectorTable(buffer);
     }
-    return this.uploader.writeToRAM(buffer)
-      .then(() => this.writer.copyRAMToFlash(ramAddr, buffer.length));
+    return this.uploader.writeToRAM(buffer).then(() => this.writer.copyRAMToFlash(ramAddr, buffer.length));
   }
 }

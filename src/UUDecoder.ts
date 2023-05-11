@@ -1,7 +1,6 @@
 const _checksumSym = Symbol();
 
 export class UUDecoder {
-
   constructor() {
     this[_checksumSym] = 0;
   }
@@ -19,7 +18,8 @@ export class UUDecoder {
     let out = new Buffer(length);
     let sum = 0;
     length -= 3;
-    let i = 0, j = 1;
+    let i = 0,
+      j = 1;
     while (i < length) {
       let a = data.charCodeAt(j++);
       let b = data.charCodeAt(j++);
@@ -51,11 +51,10 @@ export class UUDecoder {
     this[_checksumSym] += sum;
     return out;
   }
-
 }
 
 function decodeSingle(c: number): number {
-  return c === 0x60 ? 0 : (c - 32);
+  return c === 0x60 ? 0 : c - 32;
 }
 
 function decodeQuad(a: number, b: number, c: number, d: number): number[] {
@@ -63,7 +62,9 @@ function decodeQuad(a: number, b: number, c: number, d: number): number[] {
   b = decodeSingle(b);
   c = decodeSingle(c);
   d = decodeSingle(d);
-  return [((a & 0x3F) << 2) | ((b & 0x30) >>> 4),
-    ((b & 0x0F) << 4) | ((c & 0x3C) >>> 2),
-    ((c & 0x03) << 6) | (d & 0x3F)];
+  return [
+    ((a & 0x3f) << 2) | ((b & 0x30) >>> 4),
+    ((b & 0x0f) << 4) | ((c & 0x3c) >>> 2),
+    ((c & 0x03) << 6) | (d & 0x3f),
+  ];
 }

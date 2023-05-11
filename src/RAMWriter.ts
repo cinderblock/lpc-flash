@@ -1,20 +1,24 @@
-import {InSystemProgramming} from './InSystemProgramming';
+import { InSystemProgramming } from './InSystemProgramming';
 import * as Utilities from './Utilities';
-import {RAMAddress} from './RAMAddress';
-import {ROMAddress} from './ROMAddress';
-import {UUEncoder} from './UUEncoder';
+import { RAMAddress } from './RAMAddress';
+import { ROMAddress } from './ROMAddress';
+import { UUEncoder } from './UUEncoder';
 
 const _addressSym = Symbol();
 
 export class RAMWriter {
+  set address(address: RAMAddress) {
+    this[_addressSym] = address;
+  }
+  get address(): RAMAddress {
+    return this[_addressSym];
+  }
 
-  set address(address: RAMAddress) { this[_addressSym] = address; }
-  get address(): RAMAddress { return this[_addressSym]; }
-
-  constructor(private isp: InSystemProgramming) { }
+  constructor(private isp: InSystemProgramming) {}
 
   writeToRAM(buffer: Buffer): Promise<RAMWriter> {
-    let ret: Promise<any> = this.isp.sendCommand(`W ${this.address} ${buffer.length}`)
+    let ret: Promise<any> = this.isp
+      .sendCommand(`W ${this.address} ${buffer.length}`)
       .then(() => this.uploadChunk(buffer));
     if (InSystemProgramming.VLAB_MODE) {
       // XXX our custom bootloader sends a CMD_SUCCESS after every write ;(
@@ -34,27 +38,34 @@ export class RAMWriter {
       let index = 0;
       (function loop(): void {
         if (lineCount === Utilities.LINES_PER_UUENCODED_CHUNK || index >= buffer.length) {
-          isp.sendLine(uue.checksum.toString()).then(() => {
-            uue.reset();
-            lineCount = 0;
-            return isp.assertOK();
-          }).then(() => {
-            if (index < buffer.length) {
-              process.nextTick(loop);
-            } else {
-              resolve();
-            }
-          }).catch(error => reject(error));
-        } else { // if (index < buffer.length) {
+          isp
+            .sendLine(uue.checksum.toString())
+            .then(() => {
+              uue.reset();
+              lineCount = 0;
+              return isp.assertOK();
+            })
+            .then(() => {
+              if (index < buffer.length) {
+                process.nextTick(loop);
+              } else {
+                resolve();
+              }
+            })
+            .catch(error => reject(error));
+        } else {
+          // if (index < buffer.length) {
           let count = Math.min(Utilities.BYTES_PER_UUENCODED_LINE, buffer.length - index);
-          isp.sendLine(uue.encode(buffer, index, count)).then(() => {
-            index += count;
-            lineCount++;
-            process.nextTick(loop);
-          }).catch(error => reject(error));
+          isp
+            .sendLine(uue.encode(buffer, index, count))
+            .then(() => {
+              index += count;
+              lineCount++;
+              process.nextTick(loop);
+            })
+            .catch(error => reject(error));
         }
       })();
     });
   }
-
 }

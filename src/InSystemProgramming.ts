@@ -2,7 +2,7 @@ import { SerialPort, ReadlineParser, SerialPortOpenOptions } from 'serialport';
 import { AutoDetectTypes } from '@serialport/bindings-cpp';
 import * as ReturnCode from './ReturnCode';
 
-const UNLOCK_CODE = 0x5A5A;
+const UNLOCK_CODE = 0x5a5a;
 
 interface DataQueue<T> {
   push(data: T): void;
@@ -12,31 +12,50 @@ interface DataQueue<T> {
 
 class LineQueue implements DataQueue<string> {
   private queue: string[] = [];
-  drain(): void { this.queue.length = 0; }
-  pop(): string { return this.queue.shift(); }
-  push(data: string): void { this.queue.push(data); }
+  drain(): void {
+    this.queue.length = 0;
+  }
+  pop(): string {
+    return this.queue.shift();
+  }
+  push(data: string): void {
+    this.queue.push(data);
+  }
 }
 
-interface Logger<T> { log(msg: T): void; }
-class VerboseLogger implements Logger<string> { log(msg: string) { console.log(msg); } }
-class QuiteLogger implements Logger<string> { log(msg: string) { /* nothing */ } }
+interface Logger<T> {
+  log(msg: T): void;
+}
+class VerboseLogger implements Logger<string> {
+  log(msg: string) {
+    console.log(msg);
+  }
+}
+class QuiteLogger implements Logger<string> {
+  log(msg: string) {
+    /* nothing */
+  }
+}
 
-const LINE_QUEUE = new LineQueue;
+const LINE_QUEUE = new LineQueue();
 
 const _baudRateSym = Symbol();
 const _bootVerSym = Symbol();
 const _partIdSym = Symbol();
 
 export class InSystemProgramming {
-
-  public static get VLAB_MODE() { return process.env['ISP'] === 'vlab' };
+  public static get VLAB_MODE() {
+    return process.env['ISP'] === 'vlab';
+  }
 
   private serialport;
   private serialportParser;
 
   private queue: DataQueue<string> = LINE_QUEUE;
 
-  set verbose(b: boolean) { this.logger = b ? new VerboseLogger() : new QuiteLogger(); }
+  set verbose(b: boolean) {
+    this.logger = b ? new VerboseLogger() : new QuiteLogger();
+  }
 
   private logger: Logger<string> = new QuiteLogger();
 
@@ -91,16 +110,22 @@ export class InSystemProgramming {
             clearTimeout(to);
             resolve(data);
           },
-          pop: (): string => { throw new Error('Not implemented'); },
-          drain: (): void => { throw new Error('Not implemented'); }
+          pop: (): string => {
+            throw new Error('Not implemented');
+          },
+          drain: (): void => {
+            throw new Error('Not implemented');
+          },
         };
-      })(setTimeout(() => {
-        try {
-          reject(new Error(`Timed out: > ${timeout}ms`));
-        } finally {
-          this.queue = LINE_QUEUE;
-        }
-      }, timeout));
+      })(
+        setTimeout(() => {
+          try {
+            reject(new Error(`Timed out: > ${timeout}ms`));
+          } finally {
+            this.queue = LINE_QUEUE;
+          }
+        }, timeout),
+      );
     });
   }
 
@@ -139,14 +164,16 @@ export class InSystemProgramming {
   sendLine(data: string): Promise<InSystemProgramming> {
     let p = this.writeln(data);
     if (this.echo) {
-      p = p.then(() => {
-        return this.read();
-      }).then((ack) => {
-        if (ack !== data) {
-          throw new Error(`Not acknowledged: ${JSON.stringify(ack)}`);
-        }
-        return this;
-      });
+      p = p
+        .then(() => {
+          return this.read();
+        })
+        .then(ack => {
+          if (ack !== data) {
+            throw new Error(`Not acknowledged: ${JSON.stringify(ack)}`);
+          }
+          return this;
+        });
     }
     return p;
   }
@@ -156,8 +183,8 @@ export class InSystemProgramming {
   }
 
   assertSuccess(): Promise<InSystemProgramming> {
-    return this.read().then((data) => {
-      if (!(/^\d+$/.test(data))) {
+    return this.read().then(data => {
+      if (!/^\d+$/.test(data)) {
         throw new TypeError(`Not a number: ${JSON.stringify(data)}`);
       }
       ReturnCode.rethrow(~~data);
@@ -166,7 +193,7 @@ export class InSystemProgramming {
   }
 
   assertOK(): Promise<InSystemProgramming> {
-    return this.read().then((data) => {
+    return this.read().then(data => {
       if (data !== 'OK') {
         throw new Error(`Not "OK": ${JSON.stringify(data)}`);
       }
@@ -175,7 +202,7 @@ export class InSystemProgramming {
   }
 
   assert(ack: RegExp, timeout?: number): Promise<InSystemProgramming> {
-    return this.read(timeout).then((data) => {
+    return this.read(timeout).then(data => {
       if (data.match(ack) === null) {
         throw new Error(`Not /${ack.source}/: ${JSON.stringify(data)}`);
       }
@@ -197,16 +224,20 @@ export class InSystemProgramming {
   }
 
   setEcho(echo: boolean): Promise<InSystemProgramming> {
-    return this.sendCommand(`A ${echo ? 1 : 0}`)
-      .then(() => {
-        this.echo = echo;
-        return this;
-      });
+    return this.sendCommand(`A ${echo ? 1 : 0}`).then(() => {
+      this.echo = echo;
+      return this;
+    });
   }
 
-  get baudRate(): number { return this[_baudRateSym]; }
+  get baudRate(): number {
+    return this[_baudRateSym];
+  }
 
-  setBaudRate(baud: number, stop: SerialPortOpenOptions<AutoDetectTypes>['stopBits'] = 1): Promise<InSystemProgramming> {
+  setBaudRate(
+    baud: number,
+    stop: SerialPortOpenOptions<AutoDetectTypes>['stopBits'] = 1,
+  ): Promise<InSystemProgramming> {
     baud = ~~baud;
     if (this.baudRate === baud) {
       return Promise.resolve(this);
@@ -218,21 +249,25 @@ export class InSystemProgramming {
       .then(() => this.open());
   }
 
-  get partIdentification(): number { return this[_partIdSym]; }
+  get partIdentification(): number {
+    return this[_partIdSym];
+  }
 
   readPartIdentification(): Promise<string> {
     return this.sendCommand('J')
       .then(() => this.read())
-      .then(partId => this[_partIdSym] = partId);
+      .then(partId => (this[_partIdSym] = partId));
   }
 
-  get bootcodeVersion(): number { return this[_bootVerSym]; }
+  get bootcodeVersion(): number {
+    return this[_bootVerSym];
+  }
 
   readBootcodeVersion(): Promise<string> {
     let major_ = '';
     return this.sendCommand('K')
       .then(() => this.read())
       .then(major => Promise.all([major, this.read()]))
-      .then(ver => this[_bootVerSym] = `${ver[0]}.${ver[1]}`);
+      .then(ver => (this[_bootVerSym] = `${ver[0]}.${ver[1]}`));
   }
 }

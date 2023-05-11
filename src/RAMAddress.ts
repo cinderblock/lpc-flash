@@ -1,11 +1,16 @@
 const _addressSym = Symbol();
 
 export class RAMAddress {
+  static get BASE() {
+    return 0x40000000;
+  }
+  static get SIZE() {
+    return 32 * 1024;
+  } // 32 KB
 
-  static get BASE() { return 0x40000000; }
-  static get SIZE() { return 32 * 1024; } // 32 KB
-
-  get address(): number { return this[_addressSym]; }
+  get address(): number {
+    return this[_addressSym];
+  }
 
   constructor(addr: number) {
     addr = ~~addr; // toInteger

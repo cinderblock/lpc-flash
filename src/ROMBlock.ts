@@ -1,15 +1,20 @@
 import * as Utilities from './Utilities';
-import {MemoryBlock} from './MemoryBlock';
-import {ROMAddress} from './ROMAddress';
+import { MemoryBlock } from './MemoryBlock';
+import { ROMAddress } from './ROMAddress';
 
 const _addressSym = Symbol();
 const _lengthSym = Symbol();
 
 export class ROMBlock implements MemoryBlock {
-
-  get address(): number { return this[_addressSym].address; }
-  get sector(): number { return this[_addressSym].sector; }
-  get length(): number { return this[_lengthSym]; }
+  get address(): number {
+    return this[_addressSym].address;
+  }
+  get sector(): number {
+    return this[_addressSym].sector;
+  }
+  get length(): number {
+    return this[_lengthSym];
+  }
 
   constructor(addr: ROMAddress, size: number) {
     let n = addr.address;
@@ -54,5 +59,4 @@ export class ROMBlock implements MemoryBlock {
     let endAddr = Utilities.sectorToAddress(end) + Utilities.sectorSize(end);
     return new ROMBlock(startAddr, endAddr - startAddr.address);
   }
-
 }

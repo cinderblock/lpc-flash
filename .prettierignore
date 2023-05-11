@@ -1,0 +1,11 @@
+/coverage
+/dist
+/.dist
+/yarn.lock
+/node_modules
+/package-lock.json
+
+# No Parser
+.gitignore
+.editorconfig
+.prettierignore

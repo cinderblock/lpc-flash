@@ -1,7 +1,6 @@
 const _checksumSym = Symbol();
 
 export class UUEncoder {
-
   constructor() {
     this[_checksumSym] = 0;
   }
@@ -29,23 +28,24 @@ export class UUEncoder {
     }
     if (n < length) {
       let a = data[i++];
-      let b = (n + 1 < length) ? data[i] : 0;
+      let b = n + 1 < length ? data[i] : 0;
       out += encodeTriple(a, b, 0);
       sum += a + b;
     }
     this[_checksumSym] += sum;
     return out;
   }
-
 }
 
 function encodeSingle(b: number): string {
-  return String.fromCharCode(b ? (b + 32) : 0x60);
+  return String.fromCharCode(b ? b + 32 : 0x60);
 }
 
 function encodeTriple(a: number, b: number, c: number): string {
-  return encodeSingle((a >>> 2) & 0x3F) +
-    encodeSingle(((a << 4) & 0x30) | ((b >>> 4) & 0x0F)) +
-    encodeSingle(((b << 2) & 0x3C) | ((c >>> 6) & 0x03)) +
-    encodeSingle(c & 0x3F);
+  return (
+    encodeSingle((a >>> 2) & 0x3f) +
+    encodeSingle(((a << 4) & 0x30) | ((b >>> 4) & 0x0f)) +
+    encodeSingle(((b << 2) & 0x3c) | ((c >>> 6) & 0x03)) +
+    encodeSingle(c & 0x3f)
+  );
 }
