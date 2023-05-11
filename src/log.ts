@@ -14,37 +14,16 @@ const logger = winston.createLogger({
 });
 
 export function logFormat() {
+  let max = 20;
   return winston.format(info => {
-    // Windows gets an extra space in the console
-    const sep = process.platform === 'win32' ? ' ' : '';
-    switch (info.label) {
-      case 'build':
-        info.message = '📦' + sep + info.message;
-        delete info.label;
-        break;
-      case 'rdt':
-        // Not sure why `🖥️` needs an extra whitespace to align with others...
-        info.message = '🖥️ ' + sep + info.message;
-        delete info.label;
-        break;
-      case 'user':
-        info.message = '👤' + sep + info.message;
-        delete info.label;
-        break;
-      case 'systemd':
-        info.message = '🔧' + sep + info.message;
-        delete info.label;
-        break;
-      case 'application':
-        info.message = '🏃' + sep + info.message;
-        delete info.label;
-        break;
-      default:
-        info.message = '❔' + sep + info.message;
-        break;
+    if (info.message.toString().length > max) {
+      max = info.message.toString().length;
     }
-    // Account for varying width of label
-    info.message = '\t' + info.message;
+
+    if (info.source) {
+      info.message = info.message.toString().padEnd(max) + ` [${info.source}]`;
+    }
+
     return info;
   })();
 }
@@ -58,8 +37,9 @@ if (process.env.NODE_ENV !== 'production') {
   );
 }
 
-export default logger.child({ label: 'rdt' });
+export default logger;
 
-export const userLogger = logger.child({ label: 'user' });
-
-export const buildLogger = logger.child({ label: 'build' });
+export interface Logger {
+  info(message: string, meta: { source: string }): void;
+  warn(message: string, meta: { source: string }): void;
+}

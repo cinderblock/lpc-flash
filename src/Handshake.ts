@@ -1,4 +1,5 @@
 import { InSystemProgramming } from './InSystemProgramming';
+import { Logger } from './log';
 
 const ECHO = false;
 
@@ -6,9 +7,10 @@ export function handshake(
   isp: InSystemProgramming,
   count: number = Infinity,
   timeout: number = 20,
+  logger?: Logger,
 ): Promise<InSystemProgramming> {
   return new Promise<InSystemProgramming>((resolve, reject) => {
-    console.log(`Sync'ing...`);
+    logger?.info(`Sync'ing...`, { source: 'handshake' });
     (function synchronize() {
       let ret = isp
         .write('?')
@@ -33,7 +35,7 @@ export function handshake(
           if (count-- <= 0) {
             return reject(error);
           } else {
-            // console.warn(error);
+            logger?.warn(error, { source: 'handshake' });
             process.nextTick(synchronize);
           }
         });
