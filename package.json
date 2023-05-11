@@ -1,6 +1,6 @@
 {
   "name": "lpc-flash",
-  "version": "0.0.1",
+  "version": "0.1.1",
   "description": "NXP LPC Microprocessor Programmer",
   "author": "Claudio Destro <c.destro@vlabsistemi.com>",
   "contributors": [
