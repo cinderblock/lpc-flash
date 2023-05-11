@@ -18,7 +18,7 @@ export class RAMWriter {
 
   writeToRAM(buffer: Buffer): Promise<RAMWriter> {
     let ret: Promise<any> = this.isp
-      .sendCommand(`W ${this.address} ${buffer.length}`)
+      .sendCommand(`W ${this.address.address} ${buffer.length}`)
       .then(() => this.uploadChunk(buffer));
     if (InSystemProgramming.VLAB_MODE) {
       // XXX our custom bootloader sends a CMD_SUCCESS after every write ;(
