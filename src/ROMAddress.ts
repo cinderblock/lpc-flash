@@ -1,5 +1,3 @@
-var Symbol = require('es6-symbol');
-
 import * as Utilities from './Utilities';
 
 const _addressSym = Symbol();

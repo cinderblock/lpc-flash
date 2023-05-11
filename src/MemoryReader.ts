@@ -1,5 +1,3 @@
-var Symbol = require('es6-symbol');
-
 import {InSystemProgramming} from './InSystemProgramming';
 import * as Utilities from './Utilities';
 import {MemoryBlock} from './MemoryBlock';

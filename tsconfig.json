@@ -10,13 +10,9 @@
     "removeComments": true,
     "noImplicitAny": false,
     "noLib": false,
-    "outDir": "lib/"
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "outDir": ".dist/"
   },
-  "exclude": [
-    "lib",
-    "node_modules",
-    "test",
-    "typings/browser.d.ts",
-    "typings/browser"
-  ]
+  "exclude": [".dist", "test"]
 }

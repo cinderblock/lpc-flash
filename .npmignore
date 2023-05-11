@@ -1,8 +1,4 @@
-node_modules/
 src/
 test/
-typings/
 .npmignore
-gulpfile.js
 tsconfig.json
-typings.json

@@ -1,6 +1,5 @@
-var Symbol = require('es6-symbol');
-var SerialPort = require('serialport');
-
+import { SerialPort, ReadlineParser, SerialPortOpenOptions } from 'serialport';
+import { AutoDetectTypes } from '@serialport/bindings-cpp';
 import * as ReturnCode from './ReturnCode';
 
 const UNLOCK_CODE = 0x5A5A;
@@ -33,6 +32,7 @@ export class InSystemProgramming {
   public static get VLAB_MODE() { return process.env['ISP'] === 'vlab' };
 
   private serialport;
+  private serialportParser;
 
   private queue: DataQueue<string> = LINE_QUEUE;
 
@@ -46,16 +46,19 @@ export class InSystemProgramming {
     this.reinitialize(baud, 1);
   }
 
-  private reinitialize(baud: number, stop: number) {
+  private reinitialize(baud: number, stop: SerialPortOpenOptions<AutoDetectTypes>['stopBits']) {
     this[_baudRateSym] = baud;
-   	this.serialport = new SerialPort(this.path, {
+    this.serialport = new SerialPort({
+      path: this.path,
       baudRate: baud,
       stopBits: stop,
       parity: 'none',
-      parser: SerialPort.parsers.readline('\r\n'),
-      autoOpen: false // open later
+      autoOpen: false, // open later
     });
-    this.serialport.on('data', (data: Buffer | String) => {
+
+    this.serialportParser = this.serialport.pipe(new ReadlineParser({ delimiter: '\r\n' }));
+
+    this.serialportParser.on('data', (data: Buffer | String) => {
       const s = data.toString();
       this.logger.log(`---> ${s}`);
       try {
@@ -203,7 +206,7 @@ export class InSystemProgramming {
 
   get baudRate(): number { return this[_baudRateSym]; }
 
-  setBaudRate(baud: number, stop: number = 1): Promise<InSystemProgramming> {
+  setBaudRate(baud: number, stop: SerialPortOpenOptions<AutoDetectTypes>['stopBits'] = 1): Promise<InSystemProgramming> {
     baud = ~~baud;
     if (this.baudRate === baud) {
       return Promise.resolve(this);

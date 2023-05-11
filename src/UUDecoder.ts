@@ -1,5 +1,3 @@
-var Symbol = require('es6-symbol');
-
 const _checksumSym = Symbol();
 
 export class UUDecoder {

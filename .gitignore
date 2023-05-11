@@ -1,6 +1,7 @@
-lib/
+
+# Built files
+/.dist/
+/build/
+
+# Dependency directories
 node_modules/
-test/*.js
-typings/
-npm-debug.log
-*.bin

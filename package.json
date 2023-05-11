@@ -1,36 +1,36 @@
 {
-  "name": "flashmagic.js",
-  "version": "1.0.3",
+  "name": "lpc-flash",
+  "version": "0.0.0",
   "description": "NXP LPC Microprocessor Programmer",
   "author": "Claudio Destro <c.destro@vlabsistemi.com>",
+  "contributors": [
+    {
+      "name": "Cameron Tacklind",
+      "email": "cameron@tacklind.com",
+      "url": "https://github.com/cinderblock"
+    }
+  ],
   "license": "LGPL-3.0",
   "dependencies": {
-    "buffer-hexdump": "^1.0.0",
-    "commander": "^2.9.0",
-    "es6-symbol": "^3.1.0",
-    "serialport": "^4.0.1"
+    "serialport": "^11.0.0",
+    "winston": "^3.8.2"
   },
   "devDependencies": {
-    "gulp": "^3.9.1",
-    "gulp-mocha": "^3.0.1",
-    "gulp-rm": "^1.0.1",
-    "gulp-typescript": "^3.0.1",
-    "merge2": "^1.0.2",
-    "mocha": "^3.0.2",
-    "run-sequence": "^1.2.2",
-    "typescript": "^2.0.3",
-    "typings": "^1.4.0"
+    "@types/node": "^18.14.2",
+    "@typescript-eslint/eslint-plugin": "^5.56.0",
+    "esbuild": "^0.17.11",
+    "esbuild-plugin-d.ts": "^1.1.0",
+    "esbuild-runner": "^2.2.2",
+    "eslint": "^8.35.0",
+    "prettier": "^2.8.4"
   },
-  "main": "index.js",
-  "bin": {
-    "flashmagic": "bin/flashmagic.js"
-  },
+  "main": ".dist/index.js",
   "bugs": {
-    "url": "https://github.com/claudio-destro/flashmagic.js/issues"
+    "url": "https://github.com/cinderblock/lpc-flash/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/claudio-destro/flashmagic.js.git"
+    "url": "https://github.com/cinderblock/lpc-flash.git"
   },
   "keywords": [
     "arm",
@@ -43,7 +43,9 @@
     "typescript"
   ],
   "scripts": {
-    "prepublish": "gulp publish",
-    "test": "gulp test"
+    "build": "esr dist/build.ts",
+    "build-watch": "esr dist/build.ts --watch",
+    "watch": "npm run build-watch",
+    "prepare": "npm run build"
   }
 }
