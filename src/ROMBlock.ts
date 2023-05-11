@@ -35,6 +35,9 @@ export class ROMBlock implements MemoryBlock {
   }
 
   containsAddress(addr: number | ROMAddress): boolean {
+    if (addr instanceof ROMAddress) {
+      addr = addr.address;
+    }
     return this.address <= addr && addr < this.address + this.length;
   }
 
