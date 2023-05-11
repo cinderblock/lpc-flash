@@ -11,4 +11,5 @@ You can also run `npm run build -- --skip-dts` to skip generating the `.d.ts` fi
 
 ## Publishing
 
-In the generated `.dist` directory, run `npm publish`.
+Run `npm publish .dist` in the root directory.
+Don't forget to build first!
