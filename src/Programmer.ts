@@ -3,7 +3,6 @@ import { RAMAddress } from './RAMAddress';
 import { RAMWriter } from './RAMWriter';
 import { ROMWriter } from './ROMWriter';
 import * as UserCode from './UserCode';
-import { Logger } from './log';
 
 import { EventEmitter } from 'events';
 import { Readable } from 'stream';
@@ -22,7 +21,6 @@ export class Programmer extends EventEmitter {
     private length: number,
     private srcAddr: number = RAMAddress.BASE + 1024 * 10,
     private chunkSize: number = 4096,
-    private logger?: Logger,
   ) {
     super();
     this.uploader = new RAMWriter(isp);
@@ -116,7 +114,7 @@ export class Programmer extends EventEmitter {
   private doProgramBuffer(buffer: Buffer): Promise<ROMWriter> {
     let ramAddr = this.uploader.address;
     if (this.writer.address === 0) {
-      this.logger?.info('Patching vector table...', { source: 'programmer' });
+      // this.logger?.info('Patching vector table...', { source: 'programmer' });
       UserCode.validateVectorTable(buffer);
     }
     return this.uploader.writeToRAM(buffer).then(() => this.writer.copyRAMToFlash(ramAddr, buffer.length));
