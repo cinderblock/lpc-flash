@@ -42,19 +42,25 @@ export class InSystemProgramming {
 
   private echo: boolean = true;
 
-  constructor(private path: string, baud: number, public cclk: number, private logger?: Logger) {
-    this.reinitialize(baud, 1);
+  constructor(pathOrPort: string | SerialPort, baud: number, public cclk: number, private logger?: Logger) {
+    this.serialport =
+      pathOrPort instanceof SerialPort
+        ? pathOrPort
+        : new SerialPort({
+            path: pathOrPort,
+            baudRate: baud,
+            autoOpen: false, // open later
+          });
+
+    this.reinitialize(baud);
   }
 
-  private reinitialize(baud: number, stop: SerialPortOpenOptions<AutoDetectTypes>['stopBits']) {
+  private reinitialize(baud: number, stop: SerialPortOpenOptions<AutoDetectTypes>['stopBits'] = 1) {
     this[_baudRateSym] = baud;
-    this.serialport = new SerialPort({
-      path: this.path,
-      baudRate: baud,
-      stopBits: stop,
-      parity: 'none',
-      autoOpen: false, // open later
-    });
+
+    this.serialport.setBaudRate(baud);
+    this.serialport.setStopBits(stop);
+    this.serialport.setParity('none');
 
     this.serialportParser = this.serialport.pipe(new ReadlineParser({ delimiter: '\r\n' }));
 
@@ -132,7 +138,7 @@ export class InSystemProgramming {
   close(): Promise<InSystemProgramming> {
     return new Promise<InSystemProgramming>((resolve, reject) => {
       this.serialport.close((error: any) => {
-        this.serialport = null; // GC
+        // this.serialport = null; // GC
         return error ? reject(error) : resolve(this);
       });
     });
