@@ -168,7 +168,7 @@ export class InSystemProgramming {
       if (!/^\d+$/.test(data)) {
         throw new TypeError(`Not a number: ${JSON.stringify(data)}`);
       }
-      ReturnCode.rethrow(~~data);
+      ReturnCode.rethrow(Number(data));
       return this;
     });
   }
